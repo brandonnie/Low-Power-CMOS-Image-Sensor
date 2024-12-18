@@ -1,0 +1,40 @@
+// VerilogA for cis, idac_diff_sel, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define BITS 8
+
+module diff_idac_sel (out_p, out_n, in);
+
+    parameter real VIN_MAX = 1.0;
+    parameter real V_LO = 0.0;
+    parameter real V_HI = 1.2;
+    //parameter real V_HI = 2.5;
+
+    localparam real QUANT = VIN_MAX / (2 ** `BITS);
+
+    output [0:`BITS-1] out_p;
+    output [0:`BITS-1] out_n;
+    input in;
+    electrical [0:`BITS-1] out_p;
+    electrical [0:`BITS-1] out_n;
+    electrical in;
+
+    integer level;
+
+    analog begin
+        level = $floor(V(in) / QUANT);
+
+        generate i (`BITS - 1, 0) begin
+            if (level & (1 << i)) begin
+                V(out_p[i]) <+ V_HI;
+                V(out_n[i]) <+ V_LO;
+            end else begin
+                V(out_p[i]) <+ V_LO;
+                V(out_n[i]) <+ V_HI;
+            end
+        end
+    end
+
+endmodule

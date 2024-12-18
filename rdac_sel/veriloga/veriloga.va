@@ -1,0 +1,35 @@
+// VerilogA for cis, rdac_sel, veriloga
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define BITS 32
+
+// Converts an analog input to a one-hot encoding output
+module rdac_sel (out, in);
+    parameter real VIN_MAX = 1.0;
+    parameter real V_LO = 0.0;
+    parameter real V_HI = 1.2;
+    //parameter real V_HI = 2.5;
+
+    localparam real QUANT = VIN_MAX / `BITS;
+
+    output [`BITS-1:0] out;
+    input in;
+    electrical [`BITS-1:0] out;
+    electrical in;
+
+    integer level;
+
+    analog begin
+        level = $floor(V(in) / QUANT);
+        generate i (`BITS - 1, 0) begin
+            if (i == level) begin
+                V(out[i]) <+ V_HI;
+            end else begin
+                V(out[i]) <+ V_LO;
+            end
+        end
+    end
+
+endmodule
